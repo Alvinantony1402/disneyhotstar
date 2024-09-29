@@ -61,12 +61,12 @@ width: 7rem;
 margin: 0px;
 display: flex;
 flex-direction: column;
-background: linear-gradient(to right, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+background: linear-gradient(to right, rgba(4, 7, 15, 1), rgba(0, 0, 0, 0));
 z-index:999;
 &:hover {
 
     width: 15rem;
-    background: linear-gradient(to right, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+    background: linear-gradient(to right, rgba(4, 7, 15, 1), rgba(0, 0, 0, 0));
 
 }
 

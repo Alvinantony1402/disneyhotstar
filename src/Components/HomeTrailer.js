@@ -1,32 +1,101 @@
-import React from 'react'
+import React, { useEffect, useRef, useState } from 'react';
 import trailer from "../vedios/trailer.mp4";
 import styled from 'styled-components';
 import imagetitle from "../vedios/imagelogo.png";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlay } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faVolumeMute, faVolumeUp } from '@fortawesome/free-solid-svg-icons';
 
 
 
 const HomeTrailer = (props) => {
+    const [isVideoPaused, setVideoPaused] = useState(false);
+  const videoRef = useRef(null);
+  const imageTitleRef = useRef();
+  const [isMuted, setIsMuted] = useState(true);
+  const subtitleTop = 0;
+  
+
+  const handleVideoInteraction = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch(error => {
+        // Handle any potential error
+        console.error(error);
+      });
+    }
+  };
+
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+      console.log("muted")
+    }
+  };
+
+  const handleScroll = () => {
+    if (imageTitleRef.current) {
+      const imageTitleRect = imageTitleRef.current.getBoundingClientRect();
+      const top = imageTitleRect.top;
+      if (top <= 0) {
+        // Image title is at or above the top of the screen
+        setVideoPaused(true);
+      } else {
+        // Image title is below the top of the screen
+        setVideoPaused(false);
+      }
+    }
+  };
+
+  useEffect(() => {
+    // Add scroll event listener to detect when the image title is at the top
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+      // Clean up the event listener when the component is unmounted
+      window.removeEventListener('scroll', handleScroll);
+     
+      };
+    }, []);
+  
+    useEffect(() => {
+      if (isVideoPaused) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+    }, [isVideoPaused]);
+
   return (
     <>
-    <PageContainer>
+    <PageContainer onClick={handleVideoInteraction} >
         
-        <Background>
-
-        <video autoPlay muted loop>
-          <source src={trailer} type="video/mp4" /></video>
+    <Background>
+          <video
+            ref={videoRef}
+            autoPlay
+            loop
+            muted
+            
+          >
+            
+            <source src={trailer} type="video/mp4" />
+          </video>
+          <MuteButton onClick={() => videoRef.current.muted = !videoRef.current.muted}>
+            <FontAwesomeIcon icon={videoRef.current && videoRef.current.muted ? faVolumeUp : faVolumeMute} />
+          </MuteButton>
         </Background>
+
         </PageContainer>
         <Innerpagecontainer>
-        <ImageTitle>
+        <ImageTitle ref={imageTitleRef}>
             <img src = {imagetitle} />
 
 
         </ImageTitle>
         <Contentmeta>
 
-            <Subtitle>
+            <Subtitle >
             <ul class="custom-bullets">
             <li>2023</li>
             <li>2h 43min</li>
@@ -59,7 +128,9 @@ const HomeTrailer = (props) => {
             </Controls>
 
         </Contentmeta>
-       
+
+        
+        
         </Innerpagecontainer>
 
     
@@ -90,27 +161,44 @@ flex-direction: column;
 padding: 0 calc(3.5vw + 5px);
 cursor: pointer;
 
-`
+`;
 
 const Background = styled.div`
-left: 0px;
-position: fixed;
-right: 0px;
-top: 0px;
-z-index: -1;
-display: flex;
-background-repeat: no-repeat;
-background: linear-gradient(to right, transparent, black);
-video{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: -1;
+  display: flex;
+  background-repeat: no-repeat;
+  background-position: cover;
+  transition: 0.5s;
+
+  video {
     width: 100vw;
     height: 100%;
 
-    @media (max-width: 768px){
-        width: initial;
+    @media (max-width: 768px) {
+      width: initial;
     }
-}
+  }
 
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top,  rgba(4, 7, 15, 1) 10%, rgba(0, 0, 0, 0) )80%; // Adjust the gradient colors as needed
+    z-index: 2;
+  }
+
+  &.paused {
+    background: black; // Fades to black when video is paused
+  }
 `;
+
 const ImageTitle = styled.div`
 
 align-items: flex-end;
@@ -226,6 +314,8 @@ transition: transform 0.3s;
 
 
 
+
+
 icon{
 
     width: 32px;
@@ -290,6 +380,31 @@ span{
 
 `;
 
+const MuteButton = styled.button`
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background-color: transparent;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 18px;
+  z-index: 999;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+const BackgroundOverlay = styled.div`
+  position: fixed;
+  background-position: cover;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 1;
+`;
 
 
 export default HomeTrailer;
